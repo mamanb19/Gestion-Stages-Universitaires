@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offres de Stage</title>
+    <!-- Liens Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Liens pour les icônes Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <style>
+        .largeur {
+            width: 210px;
+        }
+        .table {
+            border-collapse: collapse; /* Fusionne les bordures */
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc; /* Ajoute des lignes entre les colonnes */
+            padding: 10px;
+            text-align: center;
+        }
+        .table th {
+            background-color: #e0e0e0; /* Gris clair pour l'en-tête */
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9; /* Alternance des couleurs */
+        }
+        .table-hover tbody tr:hover {
+            background-color: #d3d3d3; /* Effet au survol */
+        }
+        /* Aligner la barre de recherche et la pagination à droite */
+    .dataTables_filter, .dataTables_paginate {
+        text-align: right;
+    }
+    </style>
+</head>
+<body>
+<div class="container"><br><br>
+<div style="text-align: center">
+    <h1 class="my-4"><i class="fas fa-briefcase"></i>Offres de Stage</h1><br><br>
+</div>
+    <div class="card">
+        <div class="card-header">
+    <h4><i class="fas fa-list"></i>Liste de Stage</h4>
+    </div>
+        <div class="card-body">
+    <!-- Table des offres de stage -->
+    <table class="table table-bordered table-striped table-hover" id="table_Offre">
+        <thead>
+        <tr>
+            <th><i class="fas fa-file-alt"></i> Titre</th>
+            <th><i class="fas fa-list"></i> Description</th>
+            <th><i class="fas fa-building"></i> Entreprise</th>
+            <th><i class="fas fa-clock"></i> Durée</th>
+            <th><i class="fas fa-check-circle"></i> Compétences requises</th>
+            <th><i class="fas fa-calendar-alt"></i> Date limite</th>
+            <th><i class="fas fa-map-marker-alt"></i> Lieu</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="stage : ${stages}">
+            <td th:text="${stage.titre}"></td>
+            <td th:text="${stage.description}"></td>
+            <td th:text="${stage.entreprise}"></td>
+            <td th:text="${stage.duree}"></td>
+            <td th:text="${stage.competencesRequises}"></td>
+            <td th:text="${stage.dateLimite}"></td>
+            <td th:text="${stage.lieu}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+<script>
+    $(document).ready(function() {
+        $("#table_Offre").DataTable({
+            // Configuration DataTables
+        });
+    });
+</script>
+</body>
+</html>

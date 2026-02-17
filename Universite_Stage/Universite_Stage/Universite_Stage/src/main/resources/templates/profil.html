@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+    <link rel="stylesheet" href="../static/css/buttons.dataTables.min.css" th:href="@{/css/buttons.dataTables.min.css}"/>
+    <link rel="stylesheet" href="../static/css/jquery.dataTables.min.css" th:href="@{/css/jquery.dataTables.min.css}"/>
+    <script src="../static/js/jquery-3.7.0.js" th:src="@{/js/jquery-3.7.0.js}"></script>
+    <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+    <script src="../static/js/dataTables.buttons.min.js" th:src="@{/js/dataTables.buttons.min.js}"></script>
+    <script src="../static/js/jquery.dataTables.min.js" th:src="@{/js/jquery.dataTables.min.js}"></script>
+
+    <style>
+        /* Style global */
+        body {
+            background: linear-gradient(45deg, #003366, #0055A4);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            margin-bottom: 0;
+        }
+
+        .navbar-inverse .navbar-nav > li > a {
+            color: #fff;
+        }
+
+        .navbar-inverse .navbar-nav > li > a:hover {
+            color: #0055A4;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-menu {
+            background: rgba(0, 0, 0, 0.8);
+            border: none;
+        }
+
+        .dropdown-menu > li > a {
+            color: #fff;
+        }
+
+        .dropdown-menu > li > a:hover {
+            background: #0055A4;
+            color: #fff;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .panel-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #0055A4;
+            box-shadow: none;
+            color: #fff;
+        }
+
+        .form-control[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+        }
+
+        .btn-info {
+            background: #0055A4;
+            border: none;
+            transition: background 0.3s ease;
+            border-radius: 25px;
+        }
+
+        .btn-info:hover {
+            background: grey;
+        }
+
+        .modal-content {
+           /* background: rgba(0, 0, 0, 0.8); */
+            background-color: #003366;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            color: #fff;
+        }
+
+        .close {
+            color: #fff;
+        }
+
+        .close:hover {
+            color: #0055A4;
+        }
+
+        @media (max-width: 768px) {
+            .panel-info {
+                padding: 15px;
+            }
+
+            h3 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom+'. '+nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Déconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="panel-info">
+        <h3>Informations de l'Utilisateur</h3>
+        <form method="post">
+            <div style="display: none">
+                <input name="id" th:value="${utilisateur.id}" />
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" name="username" th:value="${utilisateur.username}" readonly />
+            </div>
+            <div class="form-group">
+                <label>Nom</label>
+                <input type="text" class="form-control" name="nom" th:value="${utilisateur.nom}" readonly />
+            </div>
+            <div class="form-group">
+                <label>Prénom(s)</label>
+                <input type="text" class="form-control" name="prenom" th:value="${utilisateur.prenom}" readonly />
+            </div>
+            <div class="row">
+                <div class="pull-left">
+                    <!-- Bouton pour ouvrir le popup -->
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#modifierModal" style="border-radius:25px;">
+                        Modifier
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Popup (Modal) pour la modification -->
+<div class="modal fade" id="modifierModal" tabindex="-1" role="dialog" aria-labelledby="modifierModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modifierModalLabel">Modifier les informations</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    <div style="display: none">
+                        <input name="id" th:value="${utilisateur.id}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" name="username" th:value="${utilisateur.username}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" name="nom" th:value="${utilisateur.nom}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Prénom(s)</label>
+                        <input type="text" class="form-control" name="prenom" th:value="${utilisateur.prenom}" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius:25px; background-color: green;">Fermer</button>
+                <button type="submit" class="btn btn-info" style="border-radius:25px;">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

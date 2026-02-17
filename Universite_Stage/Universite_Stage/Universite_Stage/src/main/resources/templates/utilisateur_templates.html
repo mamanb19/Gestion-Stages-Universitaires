@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des Utilisateurs</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+  <style>
+    .actions-column {
+      width: 200px;
+    }
+    .table {
+      border-collapse: collapse;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .table th, .table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .table th {
+      background-color: #e0e0e0;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #f9f9f9;
+    }
+    .table-hover tbody tr:hover {
+      background-color: #d3d3d3;
+    }
+    .dataTables_filter, .dataTables_paginate {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+<div class="container"><br/>
+  <h3 style="text-align: center"><i class="fas fa-users"></i>La liste des Utilisateurs</h3>
+
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-bs-toggle="tab" href="#tab_Permanent">La liste des Enseignants</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="tab" href="#tab_Etudiant">La liste des Etudiants</a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <div id="tab_Permanent" class="tab-pane fade show active">
+
+      <div class="row" style="padding-bottom: 10px; padding-top: 10px">
+        <div style="text-align: center">
+          <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#form_Ajouter_Permanent" style="border-radius:25px;">
+            <i class="fas fa-plus-circle"></i> Ajouter Enseignant
+          </button>
+        </div>
+      </div>
+
+      <!-- Debut popup ajouter un Permanent -->
+      <div class="modal fade" id="form_Ajouter_Permanent">
+        <div class="modal-dialog">
+          <div class="modal-content panel-success">
+            <!--modal Header-->
+            <div class="modal-header panel-heading">
+              <h4 class="modal-title" style="text-align: center; color:white;"><i class="fas fa-plus-circle"></i> Ajouter un Enseignant</h4>
+              <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+            </div>
+            <!--modal Body-->
+            <form th:action="@{/Administrateur/ajouterEnseignant}" method="post">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Matricule</label>
+                  <input type="text" class="form-control" name="matricule" />
+                </div>
+                <div class="form-group">
+                  <label>Nom</label>
+                  <input type="text" class="form-control" name="nom" />
+                </div>
+                <div class="form-group">
+                  <label>Prenom(s)</label>
+                  <input type="text" class="form-control" name="prenom"/>
+                </div>
+                <div class="form-group">
+                  <label>Specialite</label>
+                  <input type="text" class="form-control" name="specialite"/>
+                </div>
+                <div class="form-group">
+                  <label>Grade</label>
+                  <input type="text" class="form-control" name="grade" />
+                </div>
+                <div class="form-group">
+                  <label>Login</label>
+                  <input type="text" class="form-control" name="username"/>
+                </div>
+              </div>
+              <!--modal Footer-->
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Ajouter</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Fin popup ajouter un Enseignant -->
+
+      <!-- Debut lister tout les Permanents -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="table_Permanent">
+          <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prenom(s)</th>
+            <th>Specialite</th>
+            <th>Grade</th>
+            <th>Login</th>
+            <th>Operations</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="enseignant:${enseignants}">
+            <td th:text="${enseignant.matricule}"></td>
+            <td th:text="${enseignant.nom}"></td>
+            <td th:text="${enseignant.prenom}"></td>
+            <td th:text="${enseignant.specialite}"></td>
+            <td th:text="${enseignant.grade}"></td>
+            <td th:text="${enseignant.username}"></td>
+            <td>
+              <button class="btn btn-info btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Modifier_Permanent'+${enseignant.id}" style="padding:10px; border-radius:25px;">
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+              <button th:if="${enseignant.isArchive()} == false" class="btn btn-warning btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Archiver_Permanent'+${enseignant.id}" style="padding:10px; border-radius:25px;">
+                <i class="fas fa-archive"></i> Archiver
+              </button>
+              <button th:if="${enseignant.isArchive()} == true" class="btn btn-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Archiver_Permanent'+${enseignant.id}" style="padding:10px; border-radius:25px;">
+                <i class="fas fa-archive"></i> Desarchiver
+              </button>
+            </td>
+
+            <!-- Debut popup modifier un Permanent -->
+            <div class="modal fade" th:attr="id='form_Modifier_Permanent'+${enseignant.id}">
+              <div class="modal-dialog">
+                <div class="modal-content panel-info">
+                  <!--modal Header-->
+                  <div class="modal-header panel-heading">
+                    <h4 class="modal-title" style="text-align: center"><i class="fas fa-edit"></i> Modifier Enseignant</h4>
+                    <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                  </div>
+                  <!--modal Body-->
+                  <form th:action="@{/Administrateur/modifierEnseignant}" method="post">
+                    <div class="modal-body">
+                      <div style="display: none">
+                        <input name="id" th:value="${enseignant.id}" />
+                      </div>
+                      <div class="form-group">
+                        <label>Matricule</label>
+                        <input type="text" class="form-control" name="matricule" th:value="${enseignant.matricule}"/>
+                      </div>
+                      <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" name="nom" th:value="${enseignant.nom}"/>
+                      </div>
+                      <div class="form-group">
+                        <label>Prenom(s)</label>
+                        <input type="text" class="form-control" name="prenom" th:value="${enseignant.prenom}"/>
+                      </div>
+                      <div class="form-group">
+                        <label>Specialite</label>
+                        <input type="text" class="form-control" name="specialite" th:value="${enseignant.specialite}"/>
+                      </div>
+                      <div class="form-group">
+                        <label>Grade</label>
+                        <input type="text" class="form-control" name="grade" th:value="${enseignant.grade}"/>
+                      </div>
+                    </div>
+                    <!--modal Footer-->
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Modifier</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- Fin popup modifier un Permanent -->
+
+            <!-- Debut popup Archiver un Permanent -->
+            <div class="modal fade" th:attr="id='form_Archiver_Permanent'+${enseignant.id}">
+              <div class="modal-dialog">
+                <div th:if="${enseignant.isArchive()} == false" class="modal-content panel-warning">
+                  <!--modal Header-->
+                  <div class="modal-header panel-heading">
+                    <h4 class="modal-title" style="text-align: center"><i class="fas fa-archive"></i> Archiver Enseignant</h4>
+                    <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                  </div>
+                  <!--modal Body-->
+                  <form th:action="@{/Administrateur/archiverEnseignant}" method="post">
+                    <div class="modal-body">
+                      <div style="display: none">
+                        <input name="id" th:value="${enseignant.id}" />
+                      </div>
+                      <div class="form-group">
+                        <label>Matricule</label> :
+                        <span th:text="${enseignant.matricule}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Nom</label> :
+                        <span th:text="${enseignant.nom}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Prenom(s)</label> :
+                        <span th:text="${enseignant.prenom}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Specialite</label> :
+                        <span th:text="${enseignant.specialite}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Grade</label> :
+                        <span th:text="${enseignant.grade}"></span>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Archiver</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                  </form>
+                </div>
+
+                <div th:if="${enseignant.isArchive()} == true" class="modal-content panel-primary">
+                  <!--modal Header-->
+                  <div class="modal-header panel-heading">
+                    <h4 class="modal-title" style="text-align: center"><i class="fas fa-archive"></i> Desarchiver Enseignant</h4>
+                    <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+                  </div>
+                  <!--modal Body-->
+                  <form th:action="@{/Administrateur/archiverEnseignant}" method="post">
+                    <div class="modal-body">
+                      <div style="display: none">
+                        <input name="id" th:value="${enseignant.id}" />
+                      </div>
+                      <div class="form-group">
+                        <label>Matricule</label> :
+                        <span th:text="${enseignant.matricule}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Nom</label> :
+                        <span th:text="${enseignant.nom}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Prenom(s)</label> :
+                        <span th:text="${enseignant.prenom}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Specialite</label> :
+                        <span th:text="${enseignant.specialite}"></span>
+                      </div>
+                      <div class="form-group">
+                        <label>Grade</label> :
+                        <span th:text="${enseignant.grade}"></span>
+                      </div>
+                    </div>
+                    <!--modal Footer-->
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Desarchiver</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- Fin popup Archiver un Permanent -->
+
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Fin lister tout les Permanents -->
+
+      <!-- Debut Datatable lister Permanents -->
+      <script>
+        $(document).ready(function() {
+            $("#table_Permanent").DataTable();
+        });
+      </script>
+      <!-- Fin Datatable lister Permanents -->
+
+    </div>
+
+    <div id="tab_Etudiant" class="tab-pane fade">
+
+      <div class="row" style="padding-bottom: 10px; padding-top: 10px">
+        <div style="text-align: center">
+          <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#form_Ajouter_Etudiant" style="border-radius:25px;">
+            <i class="fas fa-plus-circle"></i> Ajouter Etudiant
+          </button>
+        </div>
+      </div>
+
+      <!-- Tableau des étudiants -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="table_Etudiants">
+          <thead>
+          <tr>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom(s)</th>
+            <th>Adresse</th>
+            <th>Téléphone</th>
+            <th>Login</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="etudiant : ${etudiants}">
+            <td th:text="${etudiant.matricule}"></td>
+            <td th:text="${etudiant.nom}"></td>
+            <td th:text="${etudiant.prenom}"></td>
+            <td th:text="${etudiant.adresse}"></td>
+            <td th:text="${etudiant.telephone}"></td>
+            <td th:text="${etudiant.username}"></td>
+            <td>
+              <button class="btn btn-info btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Modifier_Etudiant'+${etudiant.id}" style="border-radius:25px; padding:10px;">
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+              <button th:if="${etudiant.isArchive()} == false" class="btn btn-warning btn-sm d-inline-block" data-bs-toggle="modal" th:attr="data-bs-target='#form_Archiver_Etudiant'+${etudiant.id}" style="border-radius:25px; padding:10px;">
+                <i class="fas fa-archive"></i> Archiver
+              </button>
+              <button th:if="${etudiant.isArchive()} == true" class="btn btn-primary btn-sm d-inline-block" data-bs-toggle="modal" th:attr="data-bs-target='#form_Archiver_Etudiant'+${etudiant.id}" style="border-radius:25px; padding:10px;">
+                <i class="fas fa-archive"></i> Desarchiver
+              </button>
+              <button class="btn btn-danger btn-sm d-inline-block" th:data-bs-target="'#form_Supprimer_Etudiant' + ${etudiant.id}" data-bs-toggle="modal" style="border-radius:25px; padding:10px;">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Ajouter Étudiant -->
+    <div class="modal fade" id="form_Ajouter_Etudiant" tabindex="-1" role="dialog" aria-labelledby="ajouterEtudiantModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ajouterEtudiantModalLabel"><i class="fas fa-plus-circle"></i> Ajouter un Étudiant</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form th:action="@{/Administrateur/ajouterEtudiant}" method="post">
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Matricule</label>
+                <input type="text" class="form-control" name="matricule" />
+              </div>
+              <div class="form-group">
+                <label>Nom</label>
+                <input type="text" class="form-control" name="nom" />
+              </div>
+              <div class="form-group">
+                <label>Prénom(s)</label>
+                <input type="text" class="form-control" name="prenom" />
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" class="form-control" name="adresse" />
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input type="text" class="form-control" name="telephone" />
+              </div>
+              <div class="form-group">
+                <label>Login</label>
+                <input type="text" class="form-control" name="username" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Ajouter</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Modifier Étudiant -->
+    <div th:each="etudiant : ${etudiants}">
+      <div class="modal fade" th:attr="id='form_Modifier_Etudiant'+${etudiant.id}" tabindex="-1" role="dialog" aria-labelledby="modifierEtudiantModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="fas fa-edit"></i> Modifier Étudiant</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <form th:action="@{/Administrateur/modifierEtudiant}" method="post">
+              <div class="modal-body">
+                <input type="hidden" name="id" th:value="${etudiant.id}" />
+                <div class="form-group">
+                  <label>Matricule</label>
+                  <input type="text" class="form-control" name="matricule" th:value="${etudiant.matricule}" />
+                </div>
+                <div class="form-group">
+                  <label>Nom</label>
+                  <input type="text" class="form-control" name="nom" th:value="${etudiant.nom}" />
+                </div>
+                <div class="form-group">
+                  <label>Prénom(s)</label>
+                  <input type="text" class="form-control" name="prenom" th:value="${etudiant.prenom}" />
+                </div>
+                <div class="form-group">
+                  <label>Adresse</label>
+                  <input type="text" class="form-control" name="adresse" th:value="${etudiant.adresse}" />
+                </div>
+                <div class="form-group">
+                  <label>Téléphone</label>
+                  <input type="text" class="form-control" name="telephone" th:value="${etudiant.telephone}" />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Modifier</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Supprimer Étudiant -->
+      <div class="modal fade" th:attr="id='form_Supprimer_Etudiant'+${etudiant.id}" tabindex="-1" role="dialog" aria-labelledby="supprimerEtudiantModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="fas fa-trash"></i> Supprimer Étudiant</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Êtes-vous sûr de vouloir supprimer cet étudiant ?</p>
+              <p><strong>Nom : </strong><span th:text="${etudiant.nom}"></span></p>
+              <p><strong>Matricule : </strong><span th:text="${etudiant.matricule}"></span></p>
+            </div>
+            <div class="modal-footer">
+              <form th:action="@{/Administrateur/supprimerEtudiant}" method="post">
+                <input type="hidden" name="id" th:value="${etudiant.id}" />
+                <button type="submit" class="btn btn-danger" style="border-radius:25px;"><i class="fas fa-trash"></i> Supprimer</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Fin pop up supprimer Etudiant-->
+
+      <!-- Début popup Archiver un Etudiant -->
+      <div class="modal fade" th:attr="id='form_Archiver_Etudiant'+${etudiant.id}">
+        <div class="modal-dialog">
+
+          <!-- Etudiant non archivé -->
+          <div th:if="${not etudiant.isArchive()}" class="modal-content panel-warning">
+            <!-- Header Modal -->
+            <div class="modal-header panel-heading">
+              <h4 class="modal-title" style="text-align: center"><i class="fas fa-archive"></i> Archiver Etudiant</h4>
+              <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+            </div>
+            <!-- Corps Modal -->
+            <form th:action="@{/Administrateur/archiverEtudiant}" method="post">
+              <div class="modal-body">
+                <div style="display: none">
+                  <input name="id" th:value="${etudiant.id}" />
+                </div>
+                <div class="form-group">
+                  <label>Matricule</label> :
+                  <span th:text="${etudiant.matricule}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Nom</label> :
+                  <span th:text="${etudiant.nom}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Prenom(s)</label> :
+                  <span th:text="${etudiant.prenom}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Adresse</label> :
+                  <span th:text="${etudiant.adresse}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Téléphone</label> :
+                  <span th:text="${etudiant.telephone}"></span>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Archiver</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Etudiant archivé -->
+          <div th:if="${etudiant.isArchive()}" class="modal-content panel-primary">
+            <!-- Header Modal -->
+            <div class="modal-header panel-heading">
+              <h4 class="modal-title" style="text-align: center"><i class="fas fa-archive"></i> Désarchiver Etudiant</h4>
+              <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+            </div>
+            <!-- Corps Modal -->
+            <form th:action="@{/Administrateur/archiverEtudiant}" method="post">
+              <div class="modal-body">
+                <div style="display: none">
+                  <input name="id" th:value="${etudiant.id}" />
+                </div>
+                <div class="form-group">
+                  <label>Matricule</label> :
+                  <span th:text="${etudiant.matricule}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Nom</label> :
+                  <span th:text="${etudiant.nom}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Prenom(s)</label> :
+                  <span th:text="${etudiant.prenom}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Adresse</label> :
+                  <span th:text="${etudiant.adresse}"></span>
+                </div>
+                <div class="form-group">
+                  <label>Téléphone</label> :
+                  <span th:text="${etudiant.telephone}"></span>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success" style="border-radius:25px;"><i class="fas fa-save"></i> Desarchiver</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:25px;"><i class="fas fa-times"></i> Annuler</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+      <!-- Fin popup Archiver un Etudiant -->
+    </div>
+  </div>
+</div>
+<!-- Script pour initialiser DataTables -->
+<script>
+  $(document).ready(function() {
+      $('#table_Etudiants').DataTable();
+  });
+</script>
+</body>
+</html>

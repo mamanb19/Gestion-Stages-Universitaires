@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Stages</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <style>
+        .largeur {
+            width: 220px;
+        }
+        .table {
+            border-collapse: collapse; /* Fusionne les bordures */
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc; /* Ajoute des lignes entre les colonnes */
+            padding: 10px;
+            text-align: center;
+        }
+        .table th {
+            background-color: #e0e0e0; /* Gris clair pour l'en-tête */
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9; /* Alternance des couleurs */
+        }
+        .table-hover tbody tr:hover {
+            background-color: #d3d3d3; /* Effet au survol */
+        }
+        /* Aligner la barre de recherche et la pagination à droite */
+    .dataTables_filter, .dataTables_paginate {
+        text-align: right;
+    }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">
+        <i class="fas fa-briefcase"></i> Gestion des Stages
+    </h1>
+
+    <!-- Bouton pour ouvrir le modal d'ajout -->
+    <div class="text-center mb-3">
+        <button type="button" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#form_Ajouter_Stage">
+            <i class="fas fa-plus-circle"></i> Ajouter un Stage
+        </button>
+        <!-- Bouton pour accéder aux offres archivées -->
+        <a th:href="@{/stages/archivees}" class="btn btn-info mb-2">
+            <i class="fas fa-archive"></i> Voir les offres archivées
+        </a>
+    </div>
+
+    <!-- Modal pour l'ajout de stage -->
+    <div class="modal fade" id="form_Ajouter_Stage" tabindex="-1" aria-labelledby="form_Ajouter_StageLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="form_Ajouter_StageLabel"><i class="fas fa-plus-circle"></i> Ajouter un Stage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/stages/ajouter}" method="post" th:object="${stage}">
+                        <div class="mb-3">
+                            <label for="titre" class="form-label">Titre</label>
+                            <input type="text" class="form-control" id="titre" th:field="*{titre}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="entreprise" class="form-label">Entreprise</label>
+                            <input type="text" class="form-control" id="entreprise" th:field="*{entreprise}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="duree" class="form-label">Durée</label>
+                            <input type="text" class="form-control" id="duree" th:field="*{duree}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="competencesRequises" class="form-label">Compétences Requises</label>
+                            <input type="text" class="form-control" id="competencesRequises" th:field="*{competencesRequises}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateLimite" class="form-label">Date Limite</label>
+                            <input type="date" class="form-control" id="dateLimite" th:field="*{dateLimite}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lieu" class="form-label">Lieu</label>
+                            <input type="text" class="form-control" id="lieu" th:field="*{lieu}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Fermer</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Ajouter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des stages -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title"><i class="fas fa-list"></i> Liste des Stages</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped" id="table_Stage">
+                <thead>
+                <tr>
+                    <th><i class="fas fa-file-alt"></i> Titre</th>
+                    <th><i class="fas fa-list"></i> Description</th>
+                    <th><i class="fas fa-building"></i> Entreprise</th>
+                    <th><i class="fas fa-clock"></i> Durée</th>
+                    <th><i class="fas fa-check-circle"></i> Compétences requises</th>
+                    <th><i class="fas fa-calendar-alt"></i> Date limite</th>
+                    <th><i class="fas fa-map-marker-alt"></i> Lieu</th>
+                    <th class="largeur"><i class="fas fa-cogs"></i>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="stage : ${stages}">
+                    <td th:text="${stage.titre}"></td>
+                    <td th:text="${stage.description}"></td>
+                    <td th:text="${stage.entreprise}"></td>
+                    <td th:text="${stage.competencesRequises}"></td>
+                    <td th:text="${stage.duree}"></td>
+                    <td th:text="${stage.dateLimite}"></td>
+                    <td th:text="${stage.lieu}"></td>
+                    <td>
+                        <!-- Bouton pour ouvrir le modal de modification -->
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Modifier_stage_' + ${stage.id}">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <!-- Bouton pour ouvrir le modal de suppression -->
+                        <form th:action="@{/stages/supprimer}" method="post" class="d-inline">
+                            <input type="hidden" name="id" th:value="${stage.id}">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Voulez-vous vraiment supprimer cette stage ?');">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button><br><br>
+                        </form>
+                        <!-- Bouton Archiver -->
+                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#form_Archiver_Stage' + ${stage.id}"><i class="fas fa-archive"></i>Archiver</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal pour la modification -->
+    <div th:each="stage : ${stages}" class="modal fade" th:attr="id='form_Modifier_stage_' + ${stage.id}" tabindex="-1" aria-labelledby="form_Modifier_stageLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="form_Modifier_stageLabel"><i class="fas fa-edit"></i> Modifier un Stage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/stages/modifier}" method="post" th:object="${stage}">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" th:value="${stage.id}"/>
+                        <div class="mb-3">
+                            <label th:attr="for='titre_${stage.id}'" class="form-label">Titre</label>
+                            <input type="text" class="form-control" th:attr="id='titre_${stage.id}'" th:value="${stage.titre}"  name="titre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='description_${stage.id}'" class="form-label">Description</label>
+                            <textarea class="form-control" th:attr="id='description_${stage.id}'" th:value="${stage.description}" name="description" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='entreprise_${stage.id}'" class="form-label">Entreprise</label>
+                            <input type="text" class="form-control" th:attr="id='entreprise_${stage.id}'" th:value="${stage.entreprise}" name="entreprise" required>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='duree_${stage.id}'" class="form-label">Durée</label>
+                            <input type="text" class="form-control" th:attr="id='duree_${stage.id}'" th:value="${stage.duree}" name="duree" required>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='competencesRequises_${stage.id}'" class="form-label">Compétences Requises</label>
+                            <input type="text" class="form-control" th:attr="id='competencesRequises_${stage.id}'" th:value="${stage.competencesRequises}" name="competencesRequises" required>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='dateLimite_${stage.id}'" class="form-label">Date Limite</label>
+                            <input type="date" class="form-control" th:attr="id='dateLimite_${stage.id}'" th:value="${stage.dateLimite}" name="dateLimite" required>
+                        </div>
+                        <div class="mb-3">
+                            <label th:attr="for='lieu_${stage.id}'" class="form-label">Lieu</label>
+                            <input type="text" class="form-control" th:attr="id='lieu_${stage.id}'" th:value="${stage.lieu}" name="lieu" >
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-info">Modifier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Début popup Archiver Stage -->
+    <div class="modal fade" th:each="stage : ${stages}" th:attr="id='form_Archiver_Stage' + ${stage.id}" tabindex="-1" aria-labelledby="form_Archiver_stageLabel" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content panel-danger">
+                <div class="modal-header panel-heading">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="form_Archiver_stageLabel">Archiver Stage</h4>
+                </div>
+                <form th:action="@{stages/archiver}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" th:value="${stage.id}"/>
+                        <p>Êtes-vous sûr de vouloir archiver cet Stage ?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-danger">Archiver</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fin popup Archiver Formation -->
+
+</div>
+<script>
+    $(document).ready(function() {
+        $("#table_Stage").DataTable({
+            // Configuration DataTables
+        });
+    });
+</script>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de bord</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #3a6ea5, #5b8dbe);
+            min-height: 100vh;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+        .dashboard-card {
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+        .icon-container {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .chart-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .notification-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .notification-section h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        .notification-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .notification-section li {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notification-section li span {
+            flex: 1;
+        }
+        .notification-section li small {
+            margin-left: 10px;
+            color: #ddd;
+        }
+        .notification-section li a {
+            color: #ff9a9e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .notification-section li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4 animate__animated animate__fadeInDown">Tableau de bord de l'administrateur</h1>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card text-center p-4 animate__animated animate__fadeInLeft">
+                <div class="icon-container"><i class="fas fa-briefcase"></i></div>
+                <h3 class="card-title">Stages</h3>
+                <div class="chart-container"><canvas id="stagesChart"></canvas></div>
+                <p class="card-text mt-3">Nombre de stages : <span th:text="${nombreStages}"></span></p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card text-center p-4 animate__animated animate__fadeInUp">
+                <div class="icon-container"><i class="fas fa-users"></i></div>
+                <h3 class="card-title">Étudiants</h3>
+                <div class="chart-container"><canvas id="etudiantsChart"></canvas></div>
+                <p class="card-text mt-3">Nombre d'étudiants : <span th:text="${nombreEtudiants}"></span></p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card text-center p-4 animate__animated animate__fadeInRight">
+                <div class="icon-container"><i class="fas fa-file-alt"></i></div>
+                <h3 class="card-title">Candidatures</h3>
+                <div class="chart-container"><canvas id="candidaturesChart"></canvas></div>
+                <p class="card-text mt-3">Nombre de candidatures : <span th:text="${nombreCandidatures}"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section des notifications -->
+    <div class="notification-section animate__animated animate__fadeInUp">
+        <h3>Notifications</h3>
+        <div th:if="${notifications != null and !notifications.empty}">
+            <ul>
+                <li th:each="notification : ${notifications}">
+                    <span th:text="${notification.message}"></span>
+                    <small th:text="${notification.dateCreation}"></small>
+                    <a th:href="@{/notifications/marquer-comme-lue(id=${notification.id})}">Marquer comme lue</a>
+                </li>
+            </ul>
+        </div>
+        <div th:if="${notifications == null or notifications.empty}">
+            <p>Aucune nouvelle notification.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createChart(canvasId, value, color) {
+        new Chart(document.getElementById(canvasId).getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [value, 100 - value],
+                    backgroundColor: [color, 'rgba(255, 255, 255, 0.3)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
+            }
+        });
+    }
+    createChart('stagesChart', 50, '#ff9a9e');
+    createChart('etudiantsChart', 70, '#fad0c4');
+    createChart('candidaturesChart', 30, '#a18cd1');
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <link  rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+    <link  rel="stylesheet" href="../static/css/buttons.dataTables.min.css" th:href="@{/css/buttons.dataTables.min.css}"/>
+    <link  rel="stylesheet" href="../static/css/jquery.dataTables.min.css" th:href="@{/css/jquery.dataTables.min.css}"/>
+
+    <script src="../static/js/jquery-3.7.0.js" th:src="@{/js/jquery-3.7.0.js}"></script>
+    <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+    <script src="../static/js/dataTables.buttons.min.js" th:src="@{/js/dataTables.buttons.min.js}"></script>
+    <script src="../static/js/jquery.dataTables.min.js" th:src="@{/js/jquery.dataTables.min.js}"></script>
+
+    <style>
+        body {
+            /*background: url('/images/home_page5.jpg')  no-repeat center top 50px fixed;  */
+            background: url('/images/home2.jpg')  no-repeat center top 20px fixed;
+            background-size: cover;
+            margin: 0;
+            padding:0;
+            width: 100vw;
+            height: 100vh;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            /*
+            background: linear-gradient(45deg, #003366, #0055A4);
+            */
+            color: white;
+            text-align: center;
+
+            padding: 0px 0px;
+        }
+        .navbar-nav  li a {
+            color: white !important; /* Blanc par défaut */
+           /* font-weight: bold; */
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Changement de couleur au survol */
+        .navbar-left li a:hover {
+            color: #FFC0CB !important; /* Rose clair au survol */
+        }
+        /* Changement de couleur au survol */
+        .navbar-right li a:hover {
+            color: #003366; !important; /* Bleu au survol */
+        }
+
+        /* Spécifique au menu déroulant */
+        .dropdown-menu li a {
+            color: black !important; /* Noir par défaut */
+        }
+
+        /* Changement de couleur au survol */
+        .dropdown-menu li a:hover {
+            color: #003366; !important;
+        }
+
+        .homepage-hero {
+            position: relative;
+            height: 90vh;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        .hero-content {
+           /* background: rgba(0, 51, 102, 0.8);*/ /* Fond semi-transparent */
+            padding: 40px;
+            border-radius: 10px;
+        }
+
+        .animated-text {
+            font-size: 3rem;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .scrolling-text {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid white;
+            animation: typing 4s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: white; }
+        }
+
+        .btn-hero {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #003366;
+            background-color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-hero:hover {
+            background-color: #0055A4;
+            color: white;
+        }
+
+    </style>
+
+    <title>Gestion Enseignants</title>
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse"  >
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a th:href="@{/Administrateur/Accueil}"><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Administrateur/Enseignant}"><span>Utilisateurs</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/stages}"><span>Gestion des offres de stage</span></a>
+                    </li>
+
+                    <li>
+                        <a th:href="@{/candidatures}"><span>Consultation des Candidatures</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Administrateur/dashboard}"><span>Tableau de Bord</span></a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom+'. '+nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li><a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<section layout:fragment="custom-content">
+</section>
+<section class="homepage-hero">
+    <div class="hero-content">
+        <h1 class="animated-text">Bienvenue à l'Université Assane SECK de Ziguinchor</h1>
+        <p class="scrolling-text">Gestion des Stages Universitaire - Simplifiez la gestion des offres et candidatures.</p>
+        <a th:href="@{/stages}" class="btn-hero">Commencer</a>
+       <!-- <a th:href="@{/formation}" class="btn-hero">Commencer</a> -->
+    </div>
+</section>
+
+<footer class="footer">
+    <p>&copy; 2025 Université Assane SECK de Ziguinchor. Tous droits réservés.</p>
+</footer>
+
+</body>
+</html>

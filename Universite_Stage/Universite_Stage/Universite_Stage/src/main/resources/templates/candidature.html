@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation des Candidatures</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- jQuery and Bootstrap Bundle (includes Popper) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <style>
+        .largeur {
+            width: 210px;
+        }
+        .table {
+            border-collapse: collapse; /* Fusionne les bordures */
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc; /* Ajoute des lignes entre les colonnes */
+            padding: 10px;
+            text-align: center;
+        }
+        .table th {
+            background-color: #e0e0e0; /* Gris clair pour l'en-tête */
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9; /* Alternance des couleurs */
+        }
+        .table-hover tbody tr:hover {
+            background-color: #d3d3d3; /* Effet au survol */
+        }
+        /* Aligner la barre de recherche et la pagination à droite */
+    .dataTables_filter, .dataTables_paginate {
+        text-align: right;
+    }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4"><i class="fas fa-briefcase"></i> Consultation des Candidatures</h1><br>
+
+    <!-- Modal pour ajouter une candidature -->
+    <div class="modal fade" id="ajouterCandidatureModal" tabindex="-1" aria-labelledby="ajouterCandidatureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ajouterCandidatureModalLabel"><i class="fas fa-plus-circle"></i> Ajouter une Candidature</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" th:action="@{/candidatures/soumettre}" enctype="multipart/form-data">
+                        <!-- Sélection de l'étudiant -->
+                        <div class="mb-3">
+                            <label for="etudiantId" class="form-label"><i class="fas fa-user-graduate"></i> Étudiant :</label>
+                            <select class="form-control" id="etudiantId" name="etudiantId" required>
+                                <option value="">Sélectionnez un étudiant</option>
+                                <option th:each="etudiant : ${etudiants}"
+                                        th:value="${etudiant.id}"
+                                        th:text="${etudiant.prenom + ' ' + etudiant.nom}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Sélection du stage -->
+                        <div class="mb-3">
+                            <label for="stageId" class="form-label"><i class="fas fa-briefcase"></i> Stage :</label>
+                            <select class="form-control" id="stageId" name="stageId" required>
+                                <option value="">Sélectionnez un stage</option>
+                                <option th:each="stage : ${stages}"
+                                        th:value="${stage.id}"
+                                        th:text="${stage.titre}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Fichiers PDF -->
+                        <div class="mb-3">
+                            <label for="lettreMotivation" class="form-label"><i class="fas fa-file-pdf"></i> Lettre de motivation (PDF) :</label>
+                            <input type="file" class="form-control" id="lettreMotivation" name="lettreMotivation" accept="application/pdf" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cv" class="form-label"><i class="fas fa-file-pdf"></i> CV (PDF) :</label>
+                            <input type="file" class="form-control" id="cv" name="cv" accept="application/pdf" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Soumettre</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte pour la liste des candidatures -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title"><i class="fas fa-list"></i> Liste des Candidatures</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover" id="table_Candidature">
+                <thead>
+                <tr>
+                    <th><i class="fas fa-user-graduate"></i> Étudiant</th>
+                    <th><i class="fas fa-briefcase"></i> Stage</th>
+                    <th><i class="fas fa-calendar-alt"></i> Date de Candidature</th>
+                    <th><i class="fas fa-info-circle"></i> Statut</th>
+                    <th><i class="fas fa-cogs"></i> Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="candidature : ${candidatures}">
+                    <td th:text="${candidature.etudiant.prenom + ' ' + candidature.etudiant.nom}"></td>
+                    <td th:text="${candidature.offreStage.titre}"></td>
+                    <td th:text="${candidature.dateCandidature}"></td>
+                    <td th:text="${candidature.statut}"></td>
+                    <td>
+                        <!-- Bouton pour ouvrir le modal de suppression -->
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" th:attr="data-bs-target='#supprimerCandidatureModal' + ${candidature.id}">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+
+                        <!-- Lien pour télécharger la lettre de motivation -->
+                        <a th:href="@{/candidatures/telecharger/lettreMotivation?id={id}(id=${candidature.id})}" class="btn btn-info btn-sm">
+                            <i class="fas fa-download"></i> Lettre
+                        </a>
+
+                        <!-- Lien pour télécharger le CV -->
+                        <a th:href="@{/candidatures/telecharger/cv?id={id}(id=${candidature.id})}" class="btn btn-info btn-sm">
+                            <i class="fas fa-download"></i> CV
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modals pour chaque candidature -->
+    <div th:each="candidature : ${candidatures}">
+        <!-- Modal pour supprimer une candidature -->
+        <div class="modal fade" th:id="'supprimerCandidatureModal' + ${candidature.id}" tabindex="-1" aria-labelledby="supprimerCandidatureModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="supprimerCandidatureModalLabel"><i class="fas fa-trash"></i> Supprimer la Candidature</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer cette candidature ?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+                        <a th:href="@{/candidatures/supprimer?id={id}(id=${candidature.id})}" class="btn btn-danger"><i class="fas fa-trash"></i> Supprimer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message de succès ou d'erreur -->
+    <p th:if="${message}" th:text="${message}" class="alert alert-success"></p>
+</div>
+
+
+<script>
+    $(document).ready(function() {
+        $('#table_Candidature').DataTable({
+            // Configuration DataTables
+        });
+    });
+</script>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
